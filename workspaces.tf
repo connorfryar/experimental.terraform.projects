@@ -1,25 +1,35 @@
-data "aws_workspaces_bundle" "value_windows_10" {
-  bundle_id = "wsb-bh8rsxt14" # Value with Windows 10 (English)
+##################################################################
+# aws cli command for bundle options
+# "aws workspaces describe-workspace-bundles --owner AMAZON"
+# This is a Windows Standard Bundle
+
+
+data "aws_workspaces_bundle" "standard_windows" {
+  bundle_id = "wsb-gk1wpk43z"
 }
 
-resource "aws_workspaces_workspace" "example" {
-  directory_id = aws_workspaces_directory.example.id
-  bundle_id    = data.aws_workspaces_bundle.value_windows_10.id
-  user_name    = "john.doe"
 
-  root_volume_encryption_enabled = true
-  user_volume_encryption_enabled = true
-  volume_encryption_key          = "alias/aws/workspaces"
 
+##################################################################
+
+resource "aws_workspaces_workspace" "workspaces" {
+  directory_id = aws_workspaces_directory.workspaces-directory.id
+  bundle_id    = data.aws_workspaces_bundle.standard_windows.id
+  # Admin is the Administrator of the AWS Directory Service
+  user_name = "Admin"
   workspace_properties {
-    compute_type_name                         = "VALUE"
-    user_volume_size_gib                      = 10
+    compute_type_name                         = "STANDARD" # compute_type_name is the compute bundle type.
+    user_volume_size_gib                      = 50
     root_volume_size_gib                      = 80
     running_mode                              = "AUTO_STOP"
     running_mode_auto_stop_timeout_in_minutes = 60
   }
-
   tags = {
-    Department = "IT"
+    Name        = "demo-workspaces"
+    Environment = "dev"
   }
+  depends_on = [
+    aws_iam_role.workspaces-default,
+    aws_workspaces_directory.workspaces-directory
+  ]
 }
